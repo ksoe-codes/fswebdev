@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Weather Calendar</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="calendar">
+      <div class="header">
+        <div class="header-item">Sunday</div>
+        <div class="header-item">Monday</div>
+        <div class="header-item">Tuesday</div>
+        <div class="header-item">Wednesday</div>
+        <div class="header-item">Thursday</div>
+        <div class="header-item">Friday</div>
+        <div class="header-item">Saturday</div>
+      </div>
+      <div class="days">
+        <?php
+          // Set timezone and get month and year from query string
+          date_default_timezone_set('UTC');
+          $month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
+          $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+          
+          // Calculate number of days in month
+          $num_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+          
+          // Get current date for comparison
+          $current_date = date('Y-m-d');
+          
+          // Determine day of week for first day of month
+          $first_day = date('N', strtotime(sprintf('%04d-%02d-01', $year, $month)));
+          
+          // Determine number of blank days to show before first day of month
+          $num_blanks = $first_day - 1;
+          
+          // Loop through each day in month, including blank days before first day
+          for ($i = 0; $i < $num_blanks; $i++) {
+            echo '<div class="day blank"></div>';
+          }
+          for ($day = 1; $day <= $num_days; $day++) {
+            // Get date string in yyyy-mm-dd format
+            $date_string = sprintf('%04d-%02d-%02d', $year, $month, $day);
+            
+            // Get weather data for date
+            $weather_data = get_weather_data($date_string);
+            
+            // Determine CSS class for day based on weather data
+            $class = '';
+            if ($weather_data['temp'] >= 80) {
+              $class = 'hot';
+            } else if ($weather_data['temp'] >= 60) {
+              $class = 'medium';
+            } else {
+              $class = 'cold';
+            }
+            
+            // Determine if day is current date
+            $is_current_date = ($date_string === $current_date);
+            
+            // Output day HTML
+            printf('<div class="day %s %s">%d</div>', $class, $is_current_date ? 'current' : '', $day);
+          }
+          // Determine number of blank days to show after last day of month
+          $num_blanks = 7 - (($num_blanks + $num_days) % 7);
+          for ($i = 0; $i < $num_blanks; $i++) {
+            echo '<div class="day blank"></div>';
+          }
+          
+          // Function to fetch weather data for a given date
+          function get_weather_data($date_string) {
+            // Make API call to get weather data for date
+            // Replace this with actual API call to open meteo or any other weather provider
+            $temp =
